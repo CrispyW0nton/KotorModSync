@@ -2,16 +2,40 @@
 // Licensed under the Business Source License 1.1 (BSL 1.1).
 // See LICENSE.txt file in the project root for full license information.
 
+using System;
 using Avalonia;
 using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
+using Avalonia.Markup.Xaml.Styling;
 using Avalonia.ReactiveUI;
+using Avalonia.Styling;
+using Avalonia.Themes.Fluent;
 using Xunit;
 
 [assembly: AvaloniaTestApplication(typeof(KOTORModSync.Tests.HeadlessTestApp))]
 
 namespace KOTORModSync.Tests
 {
+    internal sealed class HeadlessAvaloniaApp : Application
+    {
+        public override void Initialize()
+        {
+            RequestedThemeVariant = ThemeVariant.Light;
+
+            Uri fluentUri = new Uri("avares://Avalonia.Themes.Fluent/FluentTheme.xaml");
+            Styles.Add(new StyleInclude(fluentUri) { Source = fluentUri });
+
+            AddStyle("/Styles/LightStyle.axaml");
+            AddStyle("/Styles/KotorStyle.axaml");
+            AddStyle("/Styles/Kotor2Style.axaml");
+        }
+
+        private void AddStyle(string relativePath)
+        {
+            Uri styleUri = new Uri("avares://KOTORModSync" + relativePath);
+            Styles.Add(new StyleInclude(styleUri) { Source = styleUri });
+        }
+    }
 
     /// <summary>
     /// Centralized Avalonia headless bootstrap used by all GUI tests.
@@ -24,7 +48,7 @@ namespace KOTORModSync.Tests
         public const string CollectionName = "AvaloniaHeadlessCollection";
 
         public static AppBuilder BuildAvaloniaApp() =>
-            AppBuilder.Configure<App>()
+            AppBuilder.Configure<HeadlessAvaloniaApp>()
                 .UseReactiveUI()
                 .UseHeadless(new AvaloniaHeadlessPlatformOptions
                 {

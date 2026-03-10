@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Controls;
@@ -48,6 +49,39 @@ namespace KOTORModSync.Tests.HeadlessUITests
                 : new List<ModComponent>();
         }
 
+        private static MainConfig ConfigureValidPaths(out string sourceDirectory, out string destinationDirectory)
+        {
+            sourceDirectory = Path.Combine(Path.GetTempPath(), $"KMSTestSource_{Guid.NewGuid():N}");
+            destinationDirectory = Path.Combine(Path.GetTempPath(), $"KMSTestDest_{Guid.NewGuid():N}");
+
+            Directory.CreateDirectory(sourceDirectory);
+            Directory.CreateDirectory(destinationDirectory);
+            File.WriteAllText(Path.Combine(destinationDirectory, "swkotor.exe"), string.Empty);
+
+            return new MainConfig
+            {
+                sourcePath = new DirectoryInfo(sourceDirectory),
+                destinationPath = new DirectoryInfo(destinationDirectory)
+            };
+        }
+
+        private static void CleanupDirectory(string path)
+        {
+            if (!Directory.Exists(path))
+            {
+                return;
+            }
+
+            try
+            {
+                Directory.Delete(path, recursive: true);
+            }
+            catch
+            {
+                // Best effort test cleanup.
+            }
+        }
+
         private static async Task PumpEventsAsync()
         {
             await Dispatcher.UIThread.InvokeAsync(() => { }, DispatcherPriority.Background);
@@ -77,25 +111,23 @@ namespace KOTORModSync.Tests.HeadlessUITests
         public async Task StepProgress_Step1_CompleteWhenPathsSet()
         {
             var window = await CreateWindowAsync();
-            var config = new MainConfig();
+            string sourceDirectory = null;
+            string destinationDirectory = null;
             try
             {
                 await PumpEventsAsync();
-                await Dispatcher.UIThread.InvokeAsync(() =>
-                {
-                    config.sourcePath = new System.IO.DirectoryInfo(System.IO.Path.GetTempPath());
-                    config.destinationPath = new System.IO.DirectoryInfo(System.IO.Path.GetTempPath());
-                }, DispatcherPriority.Background);
+                MainConfig config = ConfigureValidPaths(out sourceDirectory, out destinationDirectory);
 
                 await PumpEventsAsync();
 
-                var validationService = new ValidationService(config);
                 bool step1Complete = ValidationService.IsStep1Complete();
 
                 Assert.True(step1Complete, "Step 1 should be complete when paths are set");
             }
             finally
             {
+                CleanupDirectory(sourceDirectory);
+                CleanupDirectory(destinationDirectory);
                 await CloseWindowAsync(window);
             }
         }
@@ -104,19 +136,15 @@ namespace KOTORModSync.Tests.HeadlessUITests
         public async Task StepProgress_Step2_CompleteWhenComponentsLoaded()
         {
             var window = await CreateWindowAsync(withComponents: true);
-            var config = new MainConfig();
+            string sourceDirectory = null;
+            string destinationDirectory = null;
             try
             {
                 await PumpEventsAsync();
-                await Dispatcher.UIThread.InvokeAsync(() =>
-                {
-                    config.sourcePath = new System.IO.DirectoryInfo(System.IO.Path.GetTempPath());
-                    config.destinationPath = new System.IO.DirectoryInfo(System.IO.Path.GetTempPath());
-                }, DispatcherPriority.Background);
+                MainConfig config = ConfigureValidPaths(out sourceDirectory, out destinationDirectory);
 
                 await PumpEventsAsync();
 
-                var validationService = new ValidationService(config);
                 bool step1Complete = ValidationService.IsStep1Complete();
                 bool step2Complete = step1Complete && MainConfig.AllComponents?.Count > 0;
 
@@ -124,6 +152,8 @@ namespace KOTORModSync.Tests.HeadlessUITests
             }
             finally
             {
+                CleanupDirectory(sourceDirectory);
+                CleanupDirectory(destinationDirectory);
                 await CloseWindowAsync(window);
             }
         }

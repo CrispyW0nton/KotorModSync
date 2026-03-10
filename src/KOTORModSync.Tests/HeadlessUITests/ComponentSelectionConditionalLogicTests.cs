@@ -48,6 +48,14 @@ namespace KOTORModSync.Tests.HeadlessUITests
                 : new List<ModComponent>();
         }
 
+        private static ComponentSelectionService CreateSelectionService(params ModComponent[] components)
+        {
+            return new ComponentSelectionService(new MainConfig
+            {
+                allComponents = components.ToList()
+            });
+        }
+
         private static async Task PumpEventsAsync()
         {
             await Dispatcher.UIThread.InvokeAsync(() => { }, DispatcherPriority.Background);
@@ -145,8 +153,9 @@ namespace KOTORModSync.Tests.HeadlessUITests
 
                 MainConfig.AllComponents = new List<ModComponent> { depComponent, component };
 
-                var selectionService = new ComponentSelectionService(new MainConfig());
+                var selectionService = CreateSelectionService(depComponent, component);
                 var visited = new HashSet<ModComponent>();
+                component.IsSelected = true;
                 selectionService.HandleComponentChecked(component, visited);
 
                 await PumpEventsAsync();
@@ -178,8 +187,9 @@ namespace KOTORModSync.Tests.HeadlessUITests
 
                 MainConfig.AllComponents = new List<ModComponent> { baseComponent, dependentComponent };
 
-                var selectionService = new ComponentSelectionService(new MainConfig());
+                var selectionService = CreateSelectionService(baseComponent, dependentComponent);
                 var visited = new HashSet<ModComponent>();
+                baseComponent.IsSelected = false;
                 selectionService.HandleComponentUnchecked(baseComponent, visited);
 
                 await PumpEventsAsync();
@@ -215,8 +225,9 @@ namespace KOTORModSync.Tests.HeadlessUITests
 
                 MainConfig.AllComponents = new List<ModComponent> { restrictedComponent, component };
 
-                var selectionService = new ComponentSelectionService(new MainConfig());
+                var selectionService = CreateSelectionService(restrictedComponent, component);
                 var visited = new HashSet<ModComponent>();
+                component.IsSelected = true;
                 selectionService.HandleComponentChecked(component, visited);
 
                 await PumpEventsAsync();
@@ -248,8 +259,9 @@ namespace KOTORModSync.Tests.HeadlessUITests
 
                 MainConfig.AllComponents = new List<ModComponent> { component, restrictedComponent };
 
-                var selectionService = new ComponentSelectionService(new MainConfig());
+                var selectionService = CreateSelectionService(component, restrictedComponent);
                 var visited = new HashSet<ModComponent>();
+                restrictedComponent.IsSelected = true;
                 selectionService.HandleComponentChecked(restrictedComponent, visited);
 
                 await PumpEventsAsync();
@@ -288,8 +300,9 @@ namespace KOTORModSync.Tests.HeadlessUITests
 
                 MainConfig.AllComponents = new List<ModComponent> { parentComponent, component };
 
-                var selectionService = new ComponentSelectionService(new MainConfig());
+                var selectionService = CreateSelectionService(parentComponent, component);
                 var visited = new HashSet<ModComponent>();
+                component.IsSelected = true;
                 selectionService.HandleComponentChecked(component, visited);
 
                 await PumpEventsAsync();
@@ -324,7 +337,7 @@ namespace KOTORModSync.Tests.HeadlessUITests
                 MainConfig.AllComponents = new List<ModComponent> { depComponent, parentComponent };
 
                 option.IsSelected = true;
-                var selectionService = new ComponentSelectionService(new MainConfig());
+                var selectionService = CreateSelectionService(depComponent, parentComponent);
                 selectionService.HandleOptionChecked(option, parentComponent);
 
                 await PumpEventsAsync();
@@ -363,7 +376,7 @@ namespace KOTORModSync.Tests.HeadlessUITests
                 MainConfig.AllComponents = new List<ModComponent> { restrictedComponent, parentComponent };
 
                 option.IsSelected = true;
-                var selectionService = new ComponentSelectionService(new MainConfig());
+                var selectionService = CreateSelectionService(restrictedComponent, parentComponent);
                 selectionService.HandleOptionChecked(option, parentComponent);
 
                 await PumpEventsAsync();
@@ -398,8 +411,9 @@ namespace KOTORModSync.Tests.HeadlessUITests
 
                 MainConfig.AllComponents = new List<ModComponent> { parentComponent, component };
 
-                var selectionService = new ComponentSelectionService(new MainConfig());
+                var selectionService = CreateSelectionService(parentComponent, component);
                 var visited = new HashSet<ModComponent>();
+                component.IsSelected = true;
                 selectionService.HandleComponentChecked(component, visited);
 
                 await PumpEventsAsync();
@@ -442,8 +456,9 @@ namespace KOTORModSync.Tests.HeadlessUITests
 
                 MainConfig.AllComponents = new List<ModComponent> { component1, component2 };
 
-                var selectionService = new ComponentSelectionService(new MainConfig());
+                var selectionService = CreateSelectionService(component1, component2);
                 var visited = new HashSet<ModComponent>();
+                component1.IsSelected = true;
                 selectionService.HandleComponentChecked(component1, visited);
 
                 await PumpEventsAsync();
@@ -486,8 +501,9 @@ namespace KOTORModSync.Tests.HeadlessUITests
 
                 MainConfig.AllComponents = new List<ModComponent> { modA, modB, modC };
 
-                var selectionService = new ComponentSelectionService(new MainConfig());
+                var selectionService = CreateSelectionService(modA, modB, modC);
                 var visited = new HashSet<ModComponent>();
+                modC.IsSelected = true;
                 selectionService.HandleComponentChecked(modC, visited);
 
                 await PumpEventsAsync();
@@ -527,8 +543,9 @@ namespace KOTORModSync.Tests.HeadlessUITests
 
                 MainConfig.AllComponents = new List<ModComponent> { modA, modB, modC };
 
-                var selectionService = new ComponentSelectionService(new MainConfig());
+                var selectionService = CreateSelectionService(modA, modB, modC);
                 var visited = new HashSet<ModComponent>();
+                modC.IsSelected = true;
                 selectionService.HandleComponentChecked(modC, visited);
 
                 await PumpEventsAsync();
@@ -567,8 +584,9 @@ namespace KOTORModSync.Tests.HeadlessUITests
 
                 MainConfig.AllComponents = new List<ModComponent> { depComponent, restrictedComponent, component };
 
-                var selectionService = new ComponentSelectionService(new MainConfig());
+                var selectionService = CreateSelectionService(depComponent, restrictedComponent, component);
                 var visited = new HashSet<ModComponent>();
+                component.IsSelected = true;
                 selectionService.HandleComponentChecked(component, visited);
 
                 await PumpEventsAsync();
